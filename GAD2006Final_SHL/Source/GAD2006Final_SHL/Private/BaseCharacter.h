@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "BaseCharacter.generated.h"
+
 
 UCLASS()
 class ABaseCharacter : public ACharacter
@@ -26,4 +30,22 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+
+	void JumpPressed();
+	void JumpReleased();
+	void LookUp(float Value);
+	void Turn(float Value);
+
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* CameraComponent;
+
+	float BaseTurnRate;
+	float BaseLookUpRate;
+
+	
 };
