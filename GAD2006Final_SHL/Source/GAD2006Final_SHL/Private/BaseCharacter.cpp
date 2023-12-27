@@ -1,7 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "BaseItem.h"
 #include "BaseCharacter.h"
+#include "InventoryComponent.h"
+#include "DrawDebugHelpers.h"
+
 
 
 // Sets default values
@@ -11,6 +15,10 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+	CameraComponent->SetupAttachment(GetMesh(), "Camera");
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	
 	
 
@@ -46,6 +54,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::JumpPressed);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::JumpReleased);
+
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABaseCharacter::Interact);
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItemFromInventory);
 }
 
 void ABaseCharacter::MoveForward(float Value)
@@ -66,11 +77,11 @@ void ABaseCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		// Find out which way is right
+		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// Get right vector
+		
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
 	}
@@ -95,4 +106,84 @@ void ABaseCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
+
+
+
+void ABaseCharacter::Interact()
+{
+	if (!CameraComponent)
+	{
+		// Kamera bileþeni yoksa çýkýþ yap
+		return;
+	}
+
+	FVector StartLocation = CameraComponent->GetComponentLocation();
+	FVector ForwardVector = CameraComponent->GetForwardVector();
+	FVector EndLocation = StartLocation + (ForwardVector * 200); // Örnek: 200 birim ileriye doðru line trace
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+
+	// Line trace yap
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+	{
+		// Çizgiyi çiz
+		DrawDebugLine(GetWorld(), StartLocation, HitResult.Location, FColor::Green, false, 2.0f, 0, 1.0f);
+
+		ABaseItem* HitItem = Cast<ABaseItem>(HitResult.GetActor());
+		if (HitItem)
+		{
+			
+			int32 EmptySlotIndex = INDEX_NONE;
+			for (int32 i = 0; i < InventoryComponent->MaxSlots; ++i)
+			{
+				if (!InventoryComponent->InventorySlots[i])
+				{
+					EmptySlotIndex = i;
+					break;
+				}
+			}
+
+			if (EmptySlotIndex != INDEX_NONE)
+			{
+				InventoryComponent->InventorySlots[EmptySlotIndex] = HitItem;
+				
+				HitItem->Destroy();
+			}
+		}
+		else
+		{
+			
+		}
+	}
+}
+
+void ABaseCharacter::DropItemFromInventory()
+{
+	int32 OccupiedSlotIndex = InventoryComponent->FindOccupiedSlot();
+	if (OccupiedSlotIndex != INDEX_NONE)
+	{
+		ABaseItem* ItemToDrop = InventoryComponent->InventorySlots[OccupiedSlotIndex];
+
+		if (ItemToDrop)
+		{
+			FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100); 
+			FRotator SpawnRotation = FRotator::ZeroRotator;
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+
+			
+			ABaseItem* SpawnedItem = GetWorld()->SpawnActor<ABaseItem>(ItemToDrop->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
+
+			
+			InventoryComponent->InventorySlots[OccupiedSlotIndex] = nullptr;
+
+			UE_LOG(LogTemp, Warning, TEXT("DropItemFromInventory called. Occupied Slot Index: %d"), OccupiedSlotIndex);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DropItemFromInventory called, but no occupied slot found."));
+	}
+}
+
 

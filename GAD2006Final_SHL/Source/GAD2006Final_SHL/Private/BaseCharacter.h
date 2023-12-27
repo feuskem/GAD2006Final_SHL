@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "BaseCharacter.generated.h"
@@ -37,12 +38,20 @@ public:
 	void JumpReleased();
 	void LookUp(float Value);
 	void Turn(float Value);
+	void Interact();
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void DropItemFromInventory();
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UInventoryComponent* InventoryComponent;
+
 
 	float BaseTurnRate;
 	float BaseLookUpRate;
