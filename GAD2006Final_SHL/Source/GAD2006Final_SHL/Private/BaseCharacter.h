@@ -56,5 +56,7 @@ public:
 	float BaseTurnRate;
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Health = 3;
 	
 };
