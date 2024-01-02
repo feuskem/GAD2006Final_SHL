@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
-#include "InventoryComponent.h"
+#include "Interactable.h"
+#include "Pickup.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "BaseCharacter.generated.h"
@@ -38,10 +39,9 @@ public:
 	void JumpReleased();
 	void LookUp(float Value);
 	void Turn(float Value);
-	void Interact();
+	
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void DropItemFromInventory();
+	
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
@@ -49,8 +49,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UInventoryComponent* InventoryComponent;
+	
 
 
 	float BaseTurnRate;
@@ -58,5 +57,42 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Health = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString UIText;
+
+	AInteractable* CurrentInteractable;
+
+	UFUNCTION(BlueprintPure)
+	bool AddItemToInventory(APickup* Item);
+
+	UFUNCTION(BlueprintPure)
+	UTexture2D* GetThumbnailAtInventorySlot(int32 Slot);
+
+	UFUNCTION(BlueprintPure)
+	FString GivenItemNameAtInventorySlot(int32 Slot);
+
+	UFUNCTION(BlueprintCallable)
+	void UseItemAtInventorySlot(int32 Slot);
+
+	UFUNCTION(BlueprintCallable)
+	void DropItem();
+private:
+
+	UPROPERTY(EditAnywhere)
+	TArray<APickup*> Inventory;
+
+	void Interact();
+
+	void CheckForInteractables();
+
+	int32 CurrentSlotIndex;
+
+	void SwitchInventorySlot(int32 NewSlotIndex);
+
+	void SwitchSlot1();
+	void SwitchSlot2();
+	void SwitchSlot3();
+	void SwitchSlot4();
 	
 };

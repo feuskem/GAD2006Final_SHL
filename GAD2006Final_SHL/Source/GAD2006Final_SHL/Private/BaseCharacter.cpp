@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BaseItem.h"
 #include "BaseCharacter.h"
-#include "InventoryComponent.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -18,7 +16,7 @@ ABaseCharacter::ABaseCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetMesh(), "Camera");
 
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	
 	
 	
 
@@ -31,6 +29,10 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	CurrentInteractable = nullptr;
+
+	Inventory.SetNum(4);
 	
 	
 }
@@ -39,6 +41,8 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	CheckForInteractables();
 
 }
 
@@ -56,18 +60,24 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::JumpReleased);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABaseCharacter::Interact);
-	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItemFromInventory);
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItem);
+
+	PlayerInputComponent->BindAction("AA", IE_Pressed, this, &ABaseCharacter::SwitchSlot1);
+	PlayerInputComponent->BindAction("AB", IE_Pressed, this, &ABaseCharacter::SwitchSlot2);
+	PlayerInputComponent->BindAction("AC", IE_Pressed, this, &ABaseCharacter::SwitchSlot3);
+	PlayerInputComponent->BindAction("AD", IE_Pressed, this, &ABaseCharacter::SwitchSlot4);
+	
 }
 
 void ABaseCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		// Find out which way is forward
+		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// Get forward vector
+		
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
 	}
@@ -109,81 +119,168 @@ void ABaseCharacter::Turn(float Value)
 
 
 
-void ABaseCharacter::Interact()
+bool ABaseCharacter::AddItemToInventory(APickup* Item)
 {
-	if (!CameraComponent)
+	
+	if (Item != NULL)
 	{
-		// Kamera bileþeni yoksa çýkýþ yap
-		return;
-	}
+		const int32 AvailableSlot = Inventory.Find(nullptr);
 
-	FVector StartLocation = CameraComponent->GetComponentLocation();
-	FVector ForwardVector = CameraComponent->GetForwardVector();
-	FVector EndLocation = StartLocation + (ForwardVector * 200); // Örnek: 200 birim ileriye doðru line trace
-	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams;
-
-	// Line trace yap
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
-	{
-		// Çizgiyi çiz
-		DrawDebugLine(GetWorld(), StartLocation, HitResult.Location, FColor::Green, false, 2.0f, 0, 1.0f);
-
-		ABaseItem* HitItem = Cast<ABaseItem>(HitResult.GetActor());
-		if (HitItem)
+		if (AvailableSlot != INDEX_NONE)
 		{
-			
-			int32 EmptySlotIndex = INDEX_NONE;
-			for (int32 i = 0; i < InventoryComponent->MaxSlots; ++i)
-			{
-				if (!InventoryComponent->InventorySlots[i])
-				{
-					EmptySlotIndex = i;
-					break;
-				}
-			}
-
-			if (EmptySlotIndex != INDEX_NONE)
-			{
-				InventoryComponent->InventorySlots[EmptySlotIndex] = HitItem;
-				
-				HitItem->Destroy();
-			}
+			Inventory[AvailableSlot] = Item;
+			return true;
 		}
 		else
 		{
-			
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("You cannot carry more items!"));
+			return false;
 		}
+
+	}
+	else return false;
+
+}
+
+UTexture2D* ABaseCharacter::GetThumbnailAtInventorySlot(int32 Slot)
+{
+	if (Inventory[Slot] != NULL)
+	{
+		return Inventory[Slot]->PickupTexture;
+	}
+	else return nullptr;
+}
+
+FString ABaseCharacter::GivenItemNameAtInventorySlot(int32 Slot)
+{
+	if (Inventory[Slot] != NULL)
+	{
+		return Inventory[Slot]->ItemName;
+	}
+
+	return FString("None");
+}
+
+void ABaseCharacter::UseItemAtInventorySlot(int32 Slot)
+{
+	if (Inventory[Slot] != NULL)
+	{
+		Inventory[Slot]->Use_Implementation();
+		Inventory[Slot] = NULL;
+	}
+
+}
+
+void ABaseCharacter::DropItem()
+{
+	if (Inventory.IsValidIndex(CurrentSlotIndex) && Inventory[CurrentSlotIndex] != nullptr)
+	{
+		
+		FActorSpawnParameters SpawnParams;
+		FTransform SpawnTransform = GetActorTransform();
+		APickup* DroppedItem = GetWorld()->SpawnActor<APickup>(Inventory[CurrentSlotIndex]->GetClass(), SpawnTransform, SpawnParams);
+
+		if (DroppedItem)
+		{
+			DroppedItem->ItemName = Inventory[CurrentSlotIndex]->ItemName;
+			DroppedItem->PickupTexture = Inventory[CurrentSlotIndex]->PickupTexture;
+			DroppedItem->Value = Inventory[CurrentSlotIndex]->Value;
+		}
+
+		
+		Inventory[CurrentSlotIndex] = nullptr;
+
+		
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Dropped %s from Slot %d"), *DroppedItem->ItemName, CurrentSlotIndex));
 	}
 }
 
-void ABaseCharacter::DropItemFromInventory()
+
+
+void ABaseCharacter::Interact()
 {
-	int32 OccupiedSlotIndex = InventoryComponent->FindOccupiedSlot();
-	if (OccupiedSlotIndex != INDEX_NONE)
+	if (CurrentInteractable !=nullptr)
 	{
-		ABaseItem* ItemToDrop = InventoryComponent->InventorySlots[OccupiedSlotIndex];
+		CurrentInteractable->Interact_Implementation();
 
-		if (ItemToDrop)
-		{
-			FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100); 
-			FRotator SpawnRotation = FRotator::ZeroRotator;
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
+		
+	}
 
-			
-			ABaseItem* SpawnedItem = GetWorld()->SpawnActor<ABaseItem>(ItemToDrop->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	
+}
 
-			
-			InventoryComponent->InventorySlots[OccupiedSlotIndex] = nullptr;
+void ABaseCharacter::CheckForInteractables()
+{
+	FVector StartLocation = CameraComponent->GetComponentLocation();
+	FVector ForwardVector = CameraComponent->GetForwardVector();
+	FVector EndLocation = StartLocation + (ForwardVector * 200);
 
-			UE_LOG(LogTemp, Warning, TEXT("DropItemFromInventory called. Occupied Slot Index: %d"), OccupiedSlotIndex);
-		}
+	FHitResult HitResult;
+
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(this);
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_WorldDynamic, CQP);
+
+	AInteractable* PotentialInteractable = Cast<AInteractable>(HitResult.GetActor());
+
+	if (PotentialInteractable == NULL)
+	{
+		UIText = FString("");
+		CurrentInteractable = nullptr;
+		return;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DropItemFromInventory called, but no occupied slot found."));
+		CurrentInteractable = PotentialInteractable;
+		UIText = PotentialInteractable->UIText;
+	}
+
+}
+
+void ABaseCharacter::SwitchInventorySlot(int32 NewSlotIndex)
+{
+
+	if (NewSlotIndex >= 0 && NewSlotIndex < Inventory.Num())
+	{
+		
+		CurrentSlotIndex = NewSlotIndex;
+
+		
+
+		
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Active Slot: %d"), CurrentSlotIndex));
 	}
 }
+
+
+
+void ABaseCharacter::SwitchSlot1()
+{
+	SwitchInventorySlot(0);
+	
+}
+
+void ABaseCharacter::SwitchSlot2()
+{
+	SwitchInventorySlot(1);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot2!"));
+	
+}
+
+void ABaseCharacter::SwitchSlot3()
+{
+	SwitchInventorySlot(2);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot3!"));
+	
+}
+
+void ABaseCharacter::SwitchSlot4()
+{
+	SwitchInventorySlot(3);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot4!"));
+	
+}
+
 
 
