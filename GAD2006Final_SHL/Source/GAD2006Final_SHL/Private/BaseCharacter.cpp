@@ -17,8 +17,6 @@ ABaseCharacter::ABaseCharacter()
 	CameraComponent->SetupAttachment(GetMesh(), "Camera");
 
 	
-	
-	
 
 }
 
@@ -236,6 +234,10 @@ void ABaseCharacter::CheckForInteractables()
 		UIText = PotentialInteractable->UIText;
 	}
 
+	/*ADoorActor* Door = Cast<ADoorActor>(HitResult.GetActor());
+	if (Door) {
+		Door->OnInteract();
+	}*/
 }
 
 void ABaseCharacter::SwitchInventorySlot(int32 NewSlotIndex)
