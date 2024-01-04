@@ -39,9 +39,9 @@ public:
 	void JumpReleased();
 	void LookUp(float Value);
 	void Turn(float Value);
-	
 
-	
+	UPROPERTY(EditAnywhere)
+	bool Moveup;
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;

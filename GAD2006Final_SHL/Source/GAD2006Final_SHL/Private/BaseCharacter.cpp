@@ -53,6 +53,9 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FString MoveUpStatus = Moveup ? FString(TEXT("Move Up")) : FString(TEXT("Not Move Up"));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Move Up Status: %s"), *MoveUpStatus));
+
 	CheckForInteractables();
 	if (CurrentWeight < 20)
 	{
@@ -70,7 +73,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 		StaminaGainRate = 10.0f;
 
 	}
-
 
 
 	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking) {
@@ -126,6 +128,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 
 
+
 	
 
 }
@@ -161,14 +164,15 @@ void ABaseCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+	
 	}
+
 }
 
 void ABaseCharacter::MoveRight(float Value)
