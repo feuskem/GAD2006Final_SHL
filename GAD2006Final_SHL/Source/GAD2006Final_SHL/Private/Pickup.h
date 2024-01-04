@@ -6,6 +6,7 @@
 #include "Interactable.h"
 #include "Pickup.generated.h"
 
+class ABaseCharacter;
 /**
  * 
  */
@@ -35,5 +36,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 Value;
 
+	UPROPERTY(EditAnywhere)
+	int32 Weight;
+
+	UFUNCTION(BlueprintCallable)
 	void OnPickedUp();
+	
 };

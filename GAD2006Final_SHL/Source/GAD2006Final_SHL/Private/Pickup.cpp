@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "BaseCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pickup.h"
@@ -13,6 +11,7 @@ APickup::APickup()
 	ItemName = FString("Enter an item name");
 	UIText = FString("Press E to pick up");
 	Value = 0;
+	Weight = 0;
 
 }
 
@@ -24,7 +23,7 @@ void APickup::BeginPlay()
 void APickup::Interact_Implementation()
 {
 
-	ABaseCharacter* Character = Cast<ABaseCharacter>(UGameplayStatics::GetPlayerCharacter(this,0));
+	ABaseCharacter* Character = Cast<ABaseCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	if (Character->AddItemToInventory(this))
 	{
@@ -32,7 +31,7 @@ void APickup::Interact_Implementation()
 		OnPickedUp();
 
 	}
-	
+
 
 }
 

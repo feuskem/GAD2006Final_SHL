@@ -15,6 +15,8 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetMesh(), "Camera");
+	GetCharacterMovement()->MaxWalkSpeed = 450.0f;
+	CurrentWeight = 0;
 
 	
 
@@ -31,6 +33,12 @@ void ABaseCharacter::BeginPlay()
 	CurrentInteractable = nullptr;
 
 	Inventory.SetNum(4);
+
+	RunReleased();
+	Stamina = MaxStamina;
+	HoldingRunKey = false;
+	StaminaDrained = false;
+
 	
 	
 }
@@ -41,6 +49,79 @@ void ABaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckForInteractables();
+	if (CurrentWeight < 20)
+	{
+		StaminaDrainRate = 20.0f;
+		StaminaGainRate = 15.0f;
+	}
+	else if (CurrentWeight >= 20 && CurrentWeight <40 )
+	{
+		StaminaDrainRate = 40.0f;
+		StaminaGainRate = 12.0f;
+	}
+	else if (CurrentWeight >= 40)
+	{
+		StaminaDrainRate = 55.0f;
+		StaminaGainRate = 10.0f;
+
+	}
+
+
+
+	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking) {
+		if (StaminaDrained)
+		{
+			Stamina = FMath::Min(MaxStamina, StaminaGainRate * DeltaTime + Stamina);
+
+			if (MaxStamina == Stamina)
+			{
+				StaminaDrained = false;
+				UpdateMovementParams();
+			}
+		}
+		else
+		{
+			if (HoldingRunKey)
+			{
+				if (!GetCharacterMovement()->Velocity.IsNearlyZero(0.01f))
+				{
+
+
+					Stamina = FMath::Max(Stamina - StaminaDrainRate * DeltaTime, 0.0f);
+
+					if (Stamina == 0.0f)
+					{
+						StaminaDrained = true;
+						UpdateMovementParams();
+					}
+				}
+				else {
+					Stamina = FMath::Min(MaxStamina, Stamina + StaminaGainRate * DeltaTime);
+
+					if (MaxStamina == Stamina)
+					{
+						StaminaDrained = false;
+						UpdateMovementParams();
+					}
+
+				}
+			}
+			else
+			{
+				Stamina = FMath::Min(MaxStamina, Stamina + StaminaGainRate * DeltaTime);
+
+				if (MaxStamina == Stamina)
+				{
+					StaminaDrained = false;
+					UpdateMovementParams();
+				}
+			}
+		}
+	}
+
+
+
+	
 
 }
 
@@ -64,6 +145,10 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("AB", IE_Pressed, this, &ABaseCharacter::SwitchSlot2);
 	PlayerInputComponent->BindAction("AC", IE_Pressed, this, &ABaseCharacter::SwitchSlot3);
 	PlayerInputComponent->BindAction("AD", IE_Pressed, this, &ABaseCharacter::SwitchSlot4);
+
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ABaseCharacter::RunPressed);
+    PlayerInputComponent->BindAction("Run", IE_Released, this, &ABaseCharacter::RunReleased);
+
 	
 }
 
@@ -126,6 +211,8 @@ bool ABaseCharacter::AddItemToInventory(APickup* Item)
 
 		if (AvailableSlot != INDEX_NONE)
 		{
+			CurrentWeight += Item->Weight;
+
 			Inventory[AvailableSlot] = Item;
 			return true;
 		}
@@ -173,6 +260,7 @@ void ABaseCharacter::DropItem()
 {
 	if (Inventory.IsValidIndex(CurrentSlotIndex) && Inventory[CurrentSlotIndex] != nullptr)
 	{
+		int32 DroppedItemWeight = Inventory[CurrentSlotIndex]->Weight;
 		
 		FActorSpawnParameters SpawnParams;
 		FTransform SpawnTransform = GetActorTransform();
@@ -183,14 +271,43 @@ void ABaseCharacter::DropItem()
 			DroppedItem->ItemName = Inventory[CurrentSlotIndex]->ItemName;
 			DroppedItem->PickupTexture = Inventory[CurrentSlotIndex]->PickupTexture;
 			DroppedItem->Value = Inventory[CurrentSlotIndex]->Value;
+			DroppedItem->Weight = Inventory[CurrentSlotIndex]->Weight;
 		}
-
+		CurrentWeight -= DroppedItemWeight;
 		
 		Inventory[CurrentSlotIndex] = nullptr;
 
 		
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Dropped %s from Slot %d"), *DroppedItem->ItemName, CurrentSlotIndex));
 	}
+}
+
+void ABaseCharacter::RunPressed()
+{
+
+	HoldingRunKey = true;
+	UpdateMovementParams();
+}
+
+void ABaseCharacter::RunReleased()
+{
+
+	HoldingRunKey = false;
+	UpdateMovementParams();
+
+}
+
+void ABaseCharacter::UpdateMovementParams()
+{
+
+	if (!StaminaDrained && HoldingRunKey)
+	{
+
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	}
+
+	else
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 

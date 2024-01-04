@@ -59,7 +59,37 @@ public:
 	int Health = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkSpeed = 450.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RunSpeed = 750.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Stamina = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxStamina = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MinStamina = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StaminaDrainRate = 20.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StaminaGainRate = 15.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool HoldingRunKey;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "COA")
+	bool StaminaDrained;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString UIText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentWeight;
 
 	AInteractable* CurrentInteractable;
 
@@ -77,6 +107,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DropItem();
+
+	void RunPressed();
+	void RunReleased();
+	void UpdateMovementParams();
 private:
 
 	UPROPERTY(EditAnywhere)
