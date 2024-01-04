@@ -11,26 +11,6 @@
  * 
  */
 
-USTRUCT(BlueprintType)
-struct FItemDataStruct : public FTableRowBase
-{
-    GENERATED_USTRUCT_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-    FString ItemName;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-    FString ItemDescription;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-    UTexture2D* ItemIcon;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-    float Weight;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    FName ItemID;
-};
 
 
 
@@ -41,14 +21,20 @@ class USHL_GameInstance : public UGameInstance
 	
 public:
     USHL_GameInstance();
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 SavedStrength;
 
-    UFUNCTION(BlueprintPure, Category = "Item")
-    FItemDataStruct GetItemData(FName ItemName);
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 SavedEndurance;
 
-private:
-    // Veri tablosu referansý
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-    class UDataTable* ItemDataTable;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 SavedCapacity;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 SavedHealth;
+
+
 
 };
 

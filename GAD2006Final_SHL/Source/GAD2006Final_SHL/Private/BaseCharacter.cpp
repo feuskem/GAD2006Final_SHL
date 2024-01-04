@@ -18,6 +18,11 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 450.0f;
 	CurrentWeight = 0;
 
+	Strength = 0;
+	Endurance = 0;
+	Capacity = 0;
+	Health = 3;
+	Points = 5;
 	
 
 }
@@ -199,6 +204,9 @@ void ABaseCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
+
+
+
 
 
 

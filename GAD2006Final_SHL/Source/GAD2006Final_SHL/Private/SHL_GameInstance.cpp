@@ -5,23 +5,9 @@
 
 USHL_GameInstance::USHL_GameInstance()
 {
-    static ConstructorHelpers::FObjectFinder<UDataTable> ItemDataTableObject(TEXT("/Script/Engine.DataTable'/Game/Blueprints/ItemDataTable.ItemDataTable'"));
-    if (ItemDataTableObject.Succeeded())
-    {
-        ItemDataTable = ItemDataTableObject.Object;
-    }
+    SavedStrength = 0;
+    SavedEndurance = 0;
+    SavedCapacity = 0;
+    SavedHealth = 3;
 }
 
-FItemDataStruct USHL_GameInstance::GetItemData(FName ItemName)
-{
-    FItemDataStruct* ItemData = ItemDataTable->FindRow<FItemDataStruct>(ItemName, FString(""));
-    if (ItemData)
-    {
-        return *ItemData;
-    }
-    else
-    {
-        // Hata durumunda boþ bir FItemDataStruct döndürülebilir veya hata mesajý gösterilebilir.
-        return FItemDataStruct();
-    }
-}

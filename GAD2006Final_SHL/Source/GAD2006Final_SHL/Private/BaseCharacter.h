@@ -46,7 +46,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* CameraComponent;
 
 	
@@ -55,8 +55,7 @@ public:
 	float BaseTurnRate;
 	float BaseLookUpRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Health = 3;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WalkSpeed = 450.0f;
@@ -90,6 +89,26 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CurrentWeight;
+
+
+	//Character Creation
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Strength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Endurance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Capacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Points;
+
+	
 
 	AInteractable* CurrentInteractable;
 
