@@ -51,6 +51,8 @@ void ABaseCharacter::BeginPlay()
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
+
+	
 	Super::Tick(DeltaTime);
 
 	FString MoveUpStatus = Moveup ? FString(TEXT("Move Up")) : FString(TEXT("Not Move Up"));
@@ -59,18 +61,20 @@ void ABaseCharacter::Tick(float DeltaTime)
 	CheckForInteractables();
 	if (CurrentWeight < 20)
 	{
-		StaminaDrainRate = 20.0f;
-		StaminaGainRate = 15.0f;
+		
+			StaminaDrainRate = 20.0f - 2*Capacity;
+			StaminaGainRate = 15.0f +2*Capacity;	
+		
 	}
 	else if (CurrentWeight >= 20 && CurrentWeight <40 )
 	{
-		StaminaDrainRate = 40.0f;
-		StaminaGainRate = 12.0f;
+		StaminaDrainRate = 40.0f - 2 * Capacity;
+		StaminaGainRate = 12.0f + 2 * Capacity;
 	}
 	else if (CurrentWeight >= 40)
 	{
-		StaminaDrainRate = 55.0f;
-		StaminaGainRate = 10.0f;
+		StaminaDrainRate = 55.0f - 2 * Capacity;
+		StaminaGainRate = 10.0f + 2 * Capacity;
 
 	}
 
