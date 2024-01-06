@@ -12,6 +12,7 @@
 #include "BaseCharacter.generated.h"
 
 
+
 UCLASS()
 class ABaseCharacter : public ACharacter
 {
@@ -39,6 +40,17 @@ public:
 	void JumpReleased();
 	void LookUp(float Value);
 	void Turn(float Value);
+
+private:
+	UPROPERTY(EditAnywhere)
+	FTimerHandle HealthDecreaseTimerHandle;
+
+public:
+
+	UPROPERTY(EditAnywhere)
+	float TimeSinceLastHealthDecrease;
+
+
 
 	UPROPERTY(EditAnywhere)
 	bool Moveup;
@@ -85,6 +97,12 @@ public:
 	bool StaminaDrained;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 GasMask;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Oxygen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString UIText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -108,12 +126,46 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Points;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxOxygen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurrentOxygen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OxygenDecreaseRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TimeSinceLastOxygenDecrease;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool GasMaskOn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurrentHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HealthDecreaseRate;
+
 	
+	
+
 
 	AInteractable* CurrentInteractable;
 
 	UFUNCTION(BlueprintPure)
 	bool AddItemToInventory(APickup* Item);
+
+	
+	void UpdateOxygen(float DeltaTime);
+
+
+	void DecreaseOxygen();
 
 	UFUNCTION(BlueprintPure)
 	UTexture2D* GetThumbnailAtInventorySlot(int32 Slot);
@@ -130,6 +182,10 @@ public:
 	void RunPressed();
 	void RunReleased();
 	void UpdateMovementParams();
+	void UseGasMask();
+	void IsGasMaskOn();
+	void DecreaseHealth();
+	void UpdateHealth(float DeltaTime);
 private:
 
 	UPROPERTY(EditAnywhere)
@@ -147,5 +203,7 @@ private:
 	void SwitchSlot2();
 	void SwitchSlot3();
 	void SwitchSlot4();
+
+	void Use();
 	
 };

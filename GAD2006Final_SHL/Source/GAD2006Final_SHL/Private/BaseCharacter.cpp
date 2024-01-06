@@ -17,12 +17,21 @@ ABaseCharacter::ABaseCharacter()
 	CameraComponent->SetupAttachment(GetMesh(), "Camera");
 	GetCharacterMovement()->MaxWalkSpeed = 450.0f;
 	CurrentWeight = 0;
-
+	GasMask = 1;
+	
 	Strength = 0;
 	Endurance = 0;
 	Capacity = 0;
-	Health = 3;
+	CurrentHealth = 3;
+	MaxHealth = 5;
+
 	Points = 5;
+
+	MaxOxygen = 100.0f;
+	CurrentOxygen = MaxOxygen;
+	HealthDecreaseRate = 1.0f;
+	OxygenDecreaseRate = 10.0f; 
+	TimeSinceLastOxygenDecrease = 0.0f;
 	
 
 }
@@ -54,6 +63,9 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 	
 	Super::Tick(DeltaTime);
+
+	UpdateOxygen(DeltaTime);
+	UpdateHealth(DeltaTime);
 
 	FString MoveUpStatus = Moveup ? FString(TEXT("Move Up")) : FString(TEXT("Not Move Up"));
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Move Up Status: %s"), *MoveUpStatus));
@@ -152,6 +164,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABaseCharacter::Interact);
 	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItem);
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &ABaseCharacter::Use);
+	PlayerInputComponent->BindAction("GasMask", IE_Pressed, this, &ABaseCharacter::IsGasMaskOn);
+	PlayerInputComponent->BindAction("Filter", IE_Pressed, this, &ABaseCharacter::UseGasMask);
 
 	PlayerInputComponent->BindAction("AA", IE_Pressed, this, &ABaseCharacter::SwitchSlot1);
 	PlayerInputComponent->BindAction("AB", IE_Pressed, this, &ABaseCharacter::SwitchSlot2);
@@ -243,6 +258,29 @@ bool ABaseCharacter::AddItemToInventory(APickup* Item)
 
 }
 
+void ABaseCharacter::UpdateOxygen(float DeltaTime)
+{
+
+	if (!GasMaskOn) {
+		TimeSinceLastOxygenDecrease += DeltaTime;
+
+		if (TimeSinceLastOxygenDecrease >= 6.0f)
+		{
+			DecreaseOxygen();
+			TimeSinceLastOxygenDecrease = 0.0f;
+		}
+
+	}
+
+	
+}
+
+void ABaseCharacter::DecreaseOxygen()
+{
+	CurrentOxygen = FMath::Max(CurrentOxygen - OxygenDecreaseRate, 0.0f);
+
+}
+
 UTexture2D* ABaseCharacter::GetThumbnailAtInventorySlot(int32 Slot)
 {
 	if (Inventory[Slot] != NULL)
@@ -267,7 +305,7 @@ void ABaseCharacter::UseItemAtInventorySlot(int32 Slot)
 	if (Inventory[Slot] != NULL)
 	{
 		Inventory[Slot]->Use_Implementation();
-		Inventory[Slot] = NULL;
+		
 	}
 
 }
@@ -325,6 +363,55 @@ void ABaseCharacter::UpdateMovementParams()
 	else
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
+
+void ABaseCharacter::UseGasMask()
+{
+
+	if (GasMask > 0 && CurrentOxygen <70)
+	{
+      GasMask -= 1;
+
+	
+	  CurrentOxygen += 30;
+
+	}
+	
+
+}
+
+void ABaseCharacter::IsGasMaskOn()
+{
+	GasMaskOn = !GasMaskOn;
+
+
+}
+
+void ABaseCharacter::DecreaseHealth()
+{
+
+	CurrentHealth = FMath::Max(CurrentHealth - HealthDecreaseRate, 0.0f);
+}
+
+void ABaseCharacter::UpdateHealth(float DeltaTime)
+{
+
+	if (CurrentOxygen == 0.0f || GasMaskOn)
+	{
+		TimeSinceLastHealthDecrease += DeltaTime;
+		
+		if (TimeSinceLastHealthDecrease >= 10.0f)
+		{
+			DecreaseHealth();
+			TimeSinceLastHealthDecrease = 0.0f;
+		}
+	}
+	
+
+}
+
+
+
+
 
 
 
@@ -415,6 +502,17 @@ void ABaseCharacter::SwitchSlot4()
 	SwitchInventorySlot(3);
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot4!"));
 	
+}
+
+void ABaseCharacter::Use()
+{
+	if (CurrentInteractable != nullptr)
+	{
+		UseItemAtInventorySlot(CurrentSlotIndex);
+
+
+	}
+
 }
 
 

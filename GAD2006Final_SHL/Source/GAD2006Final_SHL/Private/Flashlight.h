@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Pickup.h"
+#include "Components/SpotLightComponent.h"
 #include "Flashlight.generated.h"
 
 /**
@@ -16,7 +17,27 @@ class AFlashlight : public APickup
 
 public:
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool TurnOn;
+public:
+
+	AFlashlight();
+
+	virtual void BeginPlay() override;
+
+	virtual void Interact_Implementation() override;
+
+	
+	virtual void Use_Implementation() override;
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleFlashlight();
+
+	UPROPERTY(EditAnywhere)
+	float LightIntensity;
+
+	UPROPERTY(EditAnywhere)
+	bool bIsFlashlightOn;
+
+	UPROPERTY(EditAnywhere)
+	class USpotLightComponent* FlashlightComponent;
 	
 };
