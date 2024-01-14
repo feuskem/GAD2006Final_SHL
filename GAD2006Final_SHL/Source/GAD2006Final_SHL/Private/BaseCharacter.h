@@ -12,6 +12,7 @@
 #include "BaseCharacter.generated.h"
 
 
+class AGun;
 
 UCLASS()
 class ABaseCharacter : public ACharacter
@@ -40,12 +41,25 @@ public:
 	void JumpReleased();
 	void LookUp(float Value);
 	void Turn(float Value);
+	void Shoot();
 
 private:
 	UPROPERTY(EditAnywhere)
 	FTimerHandle HealthDecreaseTimerHandle;
 
 public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Shooting")
+	TSubclassOf<AActor> ProjectileBlueprint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Shooting")
+	float SpawnDistance = 100.0f; 
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AGun> GunClass;
+
+	UPROPERTY()
+	AGun* Gun;
 
 	UPROPERTY(EditAnywhere)
 	float TimeSinceLastHealthDecrease;

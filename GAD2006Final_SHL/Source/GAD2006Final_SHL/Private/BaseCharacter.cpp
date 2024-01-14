@@ -3,6 +3,7 @@
 
 #include "BaseCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Gun.h"
 
 
 
@@ -53,7 +54,7 @@ void ABaseCharacter::BeginPlay()
 	HoldingRunKey = false;
 	StaminaDrained = false;
 
-	
+	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 	
 }
 
@@ -161,6 +162,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::JumpPressed);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::JumpReleased);
+	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &ABaseCharacter::Shoot);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABaseCharacter::Interact);
 	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItem);
@@ -226,6 +228,11 @@ void ABaseCharacter::LookUp(float Value)
 void ABaseCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
+}
+
+void ABaseCharacter::Shoot()
+{
+	Gun->PullTrigger();
 }
 
 
