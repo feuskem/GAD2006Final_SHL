@@ -200,16 +200,21 @@ public:
 	void IsGasMaskOn();
 	void DecreaseHealth();
 	void UpdateHealth(float DeltaTime);
-private:
+
+	public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<APickup*> Inventory;
+
+	int32 CurrentSlotIndex;
+
+	private:
 
 	void Interact();
 
 	void CheckForInteractables();
 
-	int32 CurrentSlotIndex;
+	
 
 	void SwitchInventorySlot(int32 NewSlotIndex);
 

@@ -322,9 +322,16 @@ void ABaseCharacter::DropItem()
 	if (Inventory.IsValidIndex(CurrentSlotIndex) && Inventory[CurrentSlotIndex] != nullptr)
 	{
 		int32 DroppedItemWeight = Inventory[CurrentSlotIndex]->Weight;
-		
+
+		// Oyuncunun forward vectorunu al
+		FVector ForwardVector = GetActorForwardVector();
+
+		// Bir ofset ekleyerek yeni spawn konumu belirle
+		FVector SpawnLocation = GetActorLocation() + ForwardVector *100;
+
 		FActorSpawnParameters SpawnParams;
-		FTransform SpawnTransform = GetActorTransform();
+		FTransform SpawnTransform = FTransform(ForwardVector.Rotation(), SpawnLocation);
+
 		APickup* DroppedItem = GetWorld()->SpawnActor<APickup>(Inventory[CurrentSlotIndex]->GetClass(), SpawnTransform, SpawnParams);
 
 		if (DroppedItem)
@@ -335,10 +342,9 @@ void ABaseCharacter::DropItem()
 			DroppedItem->Weight = Inventory[CurrentSlotIndex]->Weight;
 		}
 		CurrentWeight -= DroppedItemWeight;
-		
+
 		Inventory[CurrentSlotIndex] = nullptr;
 
-		
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Dropped %s from Slot %d"), *DroppedItem->ItemName, CurrentSlotIndex));
 	}
 }

@@ -42,7 +42,7 @@ void AMine::Explode()
 {
 	if (ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)))
 	{
-		Player->Health -= Damage;
+		Player->CurrentHealth -= 2;
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MineSoundCue, this->GetActorLocation());
 		Destroy();
 	}
