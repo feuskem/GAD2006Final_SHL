@@ -146,6 +146,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentOxygen;
 
+	UPROPERTY(EditAnywhere)
+	FTimerHandle OxygenRichAreaTimerHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OxygenDecreaseRate;
 
@@ -177,6 +180,10 @@ public:
 
 	
 	void UpdateOxygen(float DeltaTime);
+
+
+	UFUNCTION()
+	void IncreaseOxygenFromArea();
 
 
 	void DecreaseOxygen();

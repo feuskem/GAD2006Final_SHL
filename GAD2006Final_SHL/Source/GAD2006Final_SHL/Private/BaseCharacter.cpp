@@ -282,6 +282,16 @@ void ABaseCharacter::UpdateOxygen(float DeltaTime)
 	
 }
 
+void ABaseCharacter::IncreaseOxygenFromArea()
+{
+
+	const float OxygenIncreaseAmount = 5.0f;
+
+	// Maksimum oksijeni geçmemesi için kontrol
+	CurrentOxygen = FMath::Min(CurrentOxygen + OxygenIncreaseAmount, MaxOxygen);
+
+}
+
 void ABaseCharacter::DecreaseOxygen()
 {
 	CurrentOxygen = FMath::Max(CurrentOxygen - OxygenDecreaseRate, 0.0f);
