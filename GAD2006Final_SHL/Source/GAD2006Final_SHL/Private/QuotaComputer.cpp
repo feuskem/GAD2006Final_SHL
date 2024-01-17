@@ -10,6 +10,7 @@ void AQuotaComputer::Interact_Implementation()
 
     // Super class'taki Interact_Implementation fonksiyonunu çaðýr
 
+    UE_LOG(LogTemp, Warning, TEXT("Quota deðeri: %d"),Quota);
 
    // Eðer sahip olduðumuz sýnýf ABaseCharacter ise devam et
     ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
