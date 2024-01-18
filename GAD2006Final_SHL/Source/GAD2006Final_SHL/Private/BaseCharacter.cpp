@@ -19,12 +19,15 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 450.0f;
 	CurrentWeight = 0;
 	GasMask = 1;
-	
+	FlashlightBattery = 100;
+	MaxBattery = 100;
 	Strength = 0;
 	Endurance = 0;
 	Capacity = 0;
 	CurrentHealth = 3;
 	MaxHealth = 5;
+	BatteryDecreaseRate = 9;
+
 
 	Points = 5;
 
@@ -67,6 +70,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 	UpdateOxygen(DeltaTime);
 	UpdateHealth(DeltaTime);
+	UpdateBattery(DeltaTime);
 
 	FString MoveUpStatus = Moveup ? FString(TEXT("Move Up")) : FString(TEXT("Not Move Up"));
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Move Up Status: %s"), *MoveUpStatus));
@@ -163,6 +167,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::JumpPressed);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::JumpReleased);
 	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &ABaseCharacter::Shoot);
+    PlayerInputComponent->BindAction("ToggleFlashlight", IE_Pressed, this, &ABaseCharacter::ToggleFlashlight);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABaseCharacter::Interact);
 	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ABaseCharacter::DropItem);
@@ -238,6 +243,13 @@ void ABaseCharacter::Shoot()
 
 
 
+void ABaseCharacter::DecreaseBattery()
+
+{
+	FlashlightBattery = FMath::Max(FlashlightBattery - BatteryDecreaseRate, 0.0f);
+}
+
+
 
 
 bool ABaseCharacter::AddItemToInventory(APickup* Item)
@@ -295,6 +307,22 @@ void ABaseCharacter::IncreaseOxygenFromArea()
 void ABaseCharacter::DecreaseOxygen()
 {
 	CurrentOxygen = FMath::Max(CurrentOxygen - OxygenDecreaseRate, 0.0f);
+
+}
+
+void ABaseCharacter::UpdateBattery(float DeltaTime)
+{
+
+	if (!FlashlightOn) {
+		TimeSinceLastBatteryDecrease += DeltaTime;
+
+		if (TimeSinceLastBatteryDecrease >= 9.0f)
+		{
+			DecreaseBattery();
+			TimeSinceLastBatteryDecrease = 0.0f;
+		}
+
+	}
 
 }
 
@@ -386,6 +414,9 @@ void ABaseCharacter::UpdateMovementParams()
 	else
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
+
+
+
 
 void ABaseCharacter::UseGasMask()
 {
@@ -535,6 +566,13 @@ void ABaseCharacter::Use()
 
 
 	}
+
+}
+
+void ABaseCharacter::ToggleFlashlight()
+{
+	FlashlightOn = !FlashlightOn;
+
 
 }
 

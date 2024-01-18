@@ -169,6 +169,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HealthDecreaseRate;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FlashlightBattery;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool FlashlightOn;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BatteryDecreaseRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TimeSinceLastBatteryDecrease;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxBattery;
+
+
+
+	
+	
+
 	
 	
 
@@ -206,6 +229,9 @@ public:
 	void UseGasMask();
 	void IsGasMaskOn();
 	void DecreaseHealth();
+	void DecreaseBattery();
+	void ToggleFlashlight();
+	void UpdateBattery(float DeltaTime);
 	void UpdateHealth(float DeltaTime);
 
 	public:
