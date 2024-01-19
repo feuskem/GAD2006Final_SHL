@@ -29,7 +29,7 @@ ABaseCharacter::ABaseCharacter()
 	Capacity = 0;
 	CurrentHealth = 3;
 	MaxHealth = 5;
-	BatteryDecreaseRate = 9;
+	BatteryDecreaseRate = 20;
 
 	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/UI_Widget/pickup.pickup"));
 
@@ -338,7 +338,7 @@ void ABaseCharacter::UpdateBattery(float DeltaTime)
 	if (!FlashlightOn) {
 		TimeSinceLastBatteryDecrease += DeltaTime;
 
-		if (TimeSinceLastBatteryDecrease >= 9.0f)
+		if (TimeSinceLastBatteryDecrease >= 2.0f)
 		{
 			DecreaseBattery();
 			TimeSinceLastBatteryDecrease = 0.0f;
