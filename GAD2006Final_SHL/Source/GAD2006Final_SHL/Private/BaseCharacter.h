@@ -49,6 +49,21 @@ private:
 
 public:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* DropSound;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* FlashlightSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* ChangeFilterSound;
+
+	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Shooting")
 	TSubclassOf<AActor> ProjectileBlueprint;
 

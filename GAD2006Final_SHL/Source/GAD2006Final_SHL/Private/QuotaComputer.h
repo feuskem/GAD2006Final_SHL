@@ -13,6 +13,8 @@ UCLASS()
 class AQuotaComputer : public AInteractable
 {
 	GENERATED_BODY()
+
+	AQuotaComputer();
 	
 public:
 
@@ -20,5 +22,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int Quota;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* QuotaSound;
 
 };

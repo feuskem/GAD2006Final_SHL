@@ -4,6 +4,9 @@
 #include "BaseCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "Gun.h"
+#include "Sound/SoundBase.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -28,6 +31,21 @@ ABaseCharacter::ABaseCharacter()
 	MaxHealth = 5;
 	BatteryDecreaseRate = 9;
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/UI_Widget/pickup.pickup"));
+
+	PickupSound = SoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DropItemSoundAsset(TEXT("/Game/UI_Widget/dropitemsfx.dropitemsfx"));
+
+	DropSound = DropItemSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> FlashlightSoundAsset(TEXT("/Script/Engine.SoundWave'/Game/UI_Widget/Flashlight.Flashlight'"));
+
+	FlashlightSound = FlashlightSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> ChangeFilterSoundAsset(TEXT("/Script/Engine.SoundWave'/Game/UI_Widget/UseFilter.UseFilter'"));
+
+	ChangeFilterSound = ChangeFilterSoundAsset.Object;
 
 	Points = 5;
 
@@ -73,7 +91,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 	UpdateBattery(DeltaTime);
 
 	FString MoveUpStatus = Moveup ? FString(TEXT("Move Up")) : FString(TEXT("Not Move Up"));
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Move Up Status: %s"), *MoveUpStatus));
+	
 
 	CheckForInteractables();
 	if (CurrentWeight < 20)
@@ -261,6 +279,10 @@ bool ABaseCharacter::AddItemToInventory(APickup* Item)
 
 		if (AvailableSlot != INDEX_NONE)
 		{
+			
+
+			UGameplayStatics::PlaySound2D(this, PickupSound);
+
 			CurrentWeight += Item->Weight;
 
 			Inventory[AvailableSlot] = Item;
@@ -299,7 +321,7 @@ void ABaseCharacter::IncreaseOxygenFromArea()
 
 	const float OxygenIncreaseAmount = 5.0f;
 
-	// Maksimum oksijeni geçmemesi için kontrol
+	
 	CurrentOxygen = FMath::Min(CurrentOxygen + OxygenIncreaseAmount, MaxOxygen);
 
 }
@@ -361,10 +383,12 @@ void ABaseCharacter::DropItem()
 	{
 		int32 DroppedItemWeight = Inventory[CurrentSlotIndex]->Weight;
 
-		// Oyuncunun forward vectorunu al
+		UGameplayStatics::PlaySound2D(this, DropSound);
+
+		
 		FVector ForwardVector = GetActorForwardVector();
 
-		// Bir ofset ekleyerek yeni spawn konumu belirle
+		
 		FVector SpawnLocation = GetActorLocation() + ForwardVector *100;
 
 		FActorSpawnParameters SpawnParams;
@@ -383,7 +407,7 @@ void ABaseCharacter::DropItem()
 
 		Inventory[CurrentSlotIndex] = nullptr;
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Dropped %s from Slot %d"), *DroppedItem->ItemName, CurrentSlotIndex));
+		
 	}
 }
 
@@ -425,6 +449,7 @@ void ABaseCharacter::UseGasMask()
 	{
       GasMask -= 1;
 
+	  UGameplayStatics::PlaySound2D(this, ChangeFilterSound);
 	
 	  CurrentOxygen += 30;
 
@@ -525,7 +550,6 @@ void ABaseCharacter::SwitchInventorySlot(int32 NewSlotIndex)
 		
 
 		
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Active Slot: %d"), CurrentSlotIndex));
 	}
 }
 
@@ -540,21 +564,21 @@ void ABaseCharacter::SwitchSlot1()
 void ABaseCharacter::SwitchSlot2()
 {
 	SwitchInventorySlot(1);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot2!"));
+	
 	
 }
 
 void ABaseCharacter::SwitchSlot3()
 {
 	SwitchInventorySlot(2);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot3!"));
+	
 	
 }
 
 void ABaseCharacter::SwitchSlot4()
 {
 	SwitchInventorySlot(3);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Slot4!"));
+	
 	
 }
 
@@ -572,6 +596,8 @@ void ABaseCharacter::Use()
 void ABaseCharacter::ToggleFlashlight()
 {
 	FlashlightOn = !FlashlightOn;
+
+	UGameplayStatics::PlaySound2D(this, FlashlightSound);
 
 
 }
