@@ -338,7 +338,7 @@ void ABaseCharacter::UpdateBattery(float DeltaTime)
 	if (!FlashlightOn) {
 		TimeSinceLastBatteryDecrease += DeltaTime;
 
-		if (TimeSinceLastBatteryDecrease >= 2.0f)
+		if (TimeSinceLastBatteryDecrease >= 3.0f)
 		{
 			DecreaseBattery();
 			TimeSinceLastBatteryDecrease = 0.0f;

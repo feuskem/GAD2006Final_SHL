@@ -25,6 +25,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void OnInteract();
+
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Mesh")
 	class UStaticMeshComponent* DoorFrame;
